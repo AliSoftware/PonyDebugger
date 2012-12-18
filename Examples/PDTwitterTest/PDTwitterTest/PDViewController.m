@@ -22,7 +22,7 @@
     #define PDLogWarning(_fmt,...)       NSLog(@"[WARN]"  (_fmt), ##__VA_ARGS__)
     #define PDLogFatal(_fmt,...)         NSLog(@"[FATAL]" (_fmt), ##__VA_ARGS__)
     #define PDLogInfo(_fmt,...)          NSLog(@"[INFO]"  (_fmt), ##__VA_ARGS__)
-    #define PDLogObject(_name,_object)   NSLog(@"%@ = %@",(_object) name:(_name))
+    #define PDLogObject(_object,_name)   NSLog(@"%@ = %@",(_object) name:(_name))
     #define PDLogGroup(_groupText,_collapse,_code) do { \
         NSLog(@"==[%@]==",_groupText); if (_code) _code(); NSLog(@"<<<<<") \
     } while(0)
@@ -254,7 +254,7 @@
     NSEntityDescription *ent = [NSEntityDescription entityForName:@"Tweet" inManagedObjectContext:self.managedObjectContext];
     for (NSDictionary *tweetDict in responseArray) {
         NSNumber *remoteID = [tweetDict objectForKey:@"id"];
-        PDLogObject(([NSString stringWithFormat:@"Tweet #%@",remoteID]), tweetDict);
+        PDLogObject(tweetDict, ([NSString stringWithFormat:@"Tweet #%@",remoteID]));
         if ([tweetIDs containsObject:remoteID]) {
             PDTweet *newTweet = [[PDTweet alloc] initWithEntity:ent insertIntoManagedObjectContext:self.managedObjectContext];
             newTweet.remoteID = remoteID;
@@ -298,7 +298,7 @@
         }];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         PDLogWarning(@"AFNetworking failure");
-        PDLogObject(@"Request Operation failed", error);
+        PDLogObject(error, @"Request Operation Error");
         [[[UIAlertView alloc] initWithTitle:@"Request Failed" message:[error localizedDescription] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
     }];
 }
@@ -321,7 +321,7 @@
         }];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         PDLogWarning(@"AFNetworking failure");
-        PDLogObject(@"Request Operation failed", error);
+        PDLogObject(error, @"Request Operation Error");
         [[[UIAlertView alloc] initWithTitle:@"Request Failed" message:[error localizedDescription] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
     }];
 }

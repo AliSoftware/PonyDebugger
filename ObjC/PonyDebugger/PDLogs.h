@@ -17,7 +17,7 @@
 #define PDLogInfo(_fmt,...)          PDLogLevel(PDConsoleLogLevelDebug,   _fmt, ##__VA_ARGS__) /* Info Log : blue icon, always visible */
 
 /* Log NSArray, NSDictionary & NSErrors as nice recursive trees */
-#define PDLogObject(_name,_object)   [[PDDebugger console] logObject:(_object) name:(_name) collapsed:YES]
+#define PDLogObject(_object,_name)   [[PDDebugger console] logObject:(_object) name:(_name) collapsed:YES]
 
 /* Log trees/groups, to organize logs into hierarchical info */
 #define PDLogGroup(_groupText,_collapse,_code)  [[PDDebugger console] logGroupMessage:(_groupText) file:(@ __FILE__) line:__LINE__ collapsed:_collapse execute:(_code)]

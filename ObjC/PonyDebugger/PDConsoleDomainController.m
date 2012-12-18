@@ -202,14 +202,22 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
     {
         /* NSError */
         NSError* error = (NSError*)object;
-        NSString* errorDescription = [NSString stringWithFormat:@"<NSError %@ (%d): \"%@\">", error.domain, error.code, error.localizedDescription];
+        NSString* errorDescription = [NSString stringWithFormat:@"<NSError %@ (%d): \"%@\">",
+                                      error.domain, error.code, error.localizedDescription];
+        if (name)
+        {
+            errorDescription = [NSString stringWithFormat:@"%@ = %@", name, errorDescription];
+        }
         NSString* domainString = [NSString stringWithFormat:@"[%@]",error.domain];
+        
         if (!error.userInfo)
         {
+            // Flat log
             [self logLevel:PDConsoleLogLevelLog message:errorDescription file:domainString line:error.code];
         }
         else
         {
+            // Hierarchical Log with UserInfo keys
             [self logGroupMessage:errorDescription file:domainString line:error.code collapsed:collapsed execute:^{
                 // Enumerate NSError's userInfo dictionary
                 [error.userInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
@@ -221,7 +229,14 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
     else
     {
         /* Other Objects */
-        [self logLevel:PDConsoleLogLevelLog format:@"%@ = %@", name, object];
+        if (name)
+        {
+            [self logLevel:PDConsoleLogLevelLog format:@"%@ = %@", name, object];
+        }
+        else
+        {
+            [self logLevel:PDConsoleLogLevelLog message:object];
+        }
     }
 }
 
