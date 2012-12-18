@@ -242,7 +242,7 @@ If you want your logs sent to the remote console to also be echoed in your Xcode
 Then to log messages into the remote console, you can use the methods defined in `<PonyDebugger/PDDebugger+Console.h>`:
 
 ``` objective-c
-[debugger logLevel:PDConsoleLogLevelWarning message:@"Woops"];
+[debugger logLevel:PDConsoleLogLevelLog message:@"We are here"];
 [debugger logLevel:PDConsoleLogLevelWarning message:@"Woops"];
 ```
 You can also use the macros defined in `<PonyDebugger/PDLogs.h>` as a drop-in remplacement for the `NSLog` macro.
