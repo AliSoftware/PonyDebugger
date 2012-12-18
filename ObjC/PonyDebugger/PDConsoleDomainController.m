@@ -100,9 +100,9 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
     
     [self.domain messageAddedWithMessage:message];
     
-    if (self.echoInLocalConsole)
+    if (self.echoInLocalConsole && message.text)
     {
-        if (message.line)
+        if (message.line && ([message.line intValue]>=0))
         {
             NSLog(@"[%@:%@] %@", [message.level uppercaseString], message.line, message.text);
         } else {

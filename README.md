@@ -46,6 +46,28 @@ An "inspect" mode can be entered by clicking on the magnifying glass in the lowe
 
 Currently only a subset of the actions possible from the elements panel have been implemented. There is significant room for continued work and improvement, but the current functionality should prove useful nonetheless.
 
+### Remove Console Logging
+
+Thanks to @AliSoftware's contribution, PonyDebugger can now also send debugging messages to the Chrome Inspector Console.
+
+![PonyDebugger Network Debugging Screenshot](https://github.com/alisoftware/PonyDebugger/raw/master/Documentation/Images/Console.png)
+
+You can filter your console messages by type (logs, warnings, errors) using the selector at the bottom of the Developer Tools window.
+
+When logging messages or errors, you can organize your logs in a hierarchical way and log some "object trees" that are collapsable.
+This is particularly useful to log dictionaries or large arrays because once you have inspected it, you can collapse it to its minimum size.
+
+The methods in the iOS client take advantage of these features:
+
+* When logging an NSDictionary or NSArray objet they are formatted using such collapsable trees
+* NSError objects also display their userInfo dictionary as a subtree to make it more easy to read NSUnderlyingError keys and others.
+For NSErrors, their domain and error code is reminded on the right of the console line (instead of the file name and line number).
+* Dumping a recursive hierarchy of a given view is also possible using these methods
+* When you send a log of type "Error", you can also see the stack trace (list of methods that have been called) to known exactly which method did call your method with the log.
+* And much more possibilities!
+
+
+
 Quick Start
 -----------
 Prerequisite: Xcode's Command Line Tools must be installed from the "Downloads" preference pane.
@@ -202,6 +224,46 @@ You can also set the attributes you want to see in the elements panel by passing
 ```
 
 PonyDebugger uses KVO to monitor changes in the attributes of all views in the hierarchy, so the information in the elements panel stays fresh.
+
+### Remote Console Logging
+
+To enable PonyDebugger to send messages to the Chrome Developer Tools Console:
+
+``` objective-c
+[debugger enableRemoteConsole];
+```
+
+If you want your logs sent to the remote console to also be echoed in your Xcode console, turn on the corresponding property:
+``` objective-c
+[debugger setEchoRemoteConsoleLocally:YES];
+```
+
+Then to log messages into the remote console, you can retrieve a reference to the `PDConsoleDomainController` using the `console` method of `PDDebugger`, and start to send messages to it:
+
+``` objective-c
+[[debugger console] logLevel:PDConsoleLogLevelWarning message:@"Woops"];
+```
+
+Anyway, I advise you to use the macros designed for that purpose instead, because they are easier to use and are quite a drop-in remplacement for the `NSLog` macro.
+Besides, they insert the source file name (`__FILE__`) and current line number (`__LINE__`) for you when appropriate.
+They are all defined in `<PonyDebugger/PDLogs.h>`:
+
+``` objective-c
+PDLog(@"Hello %@", name); // simple log
+PDLogWarning(@"Huston we have a problem"); // warning log (yellow)
+PDLogFatal(@"We should never go there!"); // error log (red) with stack track
+PDLogObject(someDict, @"niceDictionary"); // collapsable log tree
+
+PDLogGroup(@"Refresh log details",YES,^{  // will create a "group" or "tree root"
+	PDLog(@"Loading data..."); // will add this log as a child to the previous group
+	[self loadData];
+	PDLog(@"Updating model..."); // this one too
+	[self updateModel];
+	PDLog(@"Done!"); // and this one too
+}); // and the group ends here
+```
+
+----
 
 The repository contains a test application to demonstrate PonyDebugger's capabilities and usage.
 
