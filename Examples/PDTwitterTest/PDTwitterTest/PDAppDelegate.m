@@ -51,6 +51,9 @@
     [debugger enableViewHierarchyDebugging];
     [debugger setDisplayedViewAttributeKeyPaths:@[@"frame", @"hidden", @"alpha", @"opaque"]];
     
+    // Enable Remote Console
+    [debugger enableRemoteConsole];
+    
     // Connect on launch.
     [debugger connectToURL:[NSURL URLWithString:@"ws://localhost:9000/device"]];
     

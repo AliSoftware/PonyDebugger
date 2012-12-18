@@ -14,6 +14,21 @@
 #import "PDUser.h"
 #import "AFNetworking.h"
 
+#if ENABLE_PONYDEBUGGER
+    #import <PonyDebugger/PDLogs.h>
+#else
+    /* Define some poor replacements */
+    #define PDLog(_fmt,...)              NSLog(@"[DEBUG]" (_fmt), ##__VA_ARGS__)
+    #define PDLogWarning(_fmt,...)       NSLog(@"[WARN]"  (_fmt), ##__VA_ARGS__)
+    #define PDLogFatal(_fmt,...)         NSLog(@"[FATAL]" (_fmt), ##__VA_ARGS__)
+    #define PDLogInfo(_fmt,...)          NSLog(@"[INFO]"  (_fmt), ##__VA_ARGS__)
+    #define PDLogObject(_name,_object)   NSLog(@"%@ = %@",(_object) name:(_name))
+    #define PDLogGroup(_groupText,_collapse,_code) do { \
+        NSLog(@"==[%@]==",_groupText); if (_code) _code(); NSLog(@"<<<<<") \
+    } while(0)
+#endif
+
+
 
 #pragma mark - Private Interface
 
@@ -217,107 +232,96 @@
     cell.textLabel.text = [NSString stringWithFormat:@"@%@ %@", tweet.user.screenName, tweet.text];
 }
 
+- (void)_processAPIResponse:(NSArray*)responseArray
+        userRemoteIDKeyPath:(NSString*)remoteIDKeyPath
+              fillUserBlock:(void(^)(PDUser* user, NSDictionary* tweetDict))fillUserBlock
+{
+    NSMutableSet *tweetIDs = [[NSMutableSet alloc] initWithCapacity:[responseArray count]];
+    for (NSDictionary *tweetDict in responseArray) {
+        [tweetIDs addObject:[tweetDict objectForKey:@"id"]];
+    }
+    
+    NSFetchRequest *existingRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tweet"];
+    existingRequest.predicate = [NSPredicate predicateWithFormat:@"remoteID in %@", tweetIDs];
+    
+    NSArray *existingTweets = [self.managedObjectContext executeFetchRequest:existingRequest error:nil];
+    
+    for (PDTweet *tweet in existingTweets) {
+        [tweetIDs removeObject:tweet.remoteID];
+    }
+    
+    PDLogGroupStart(@"Tweets returned by the TwitterAPI call", YES);
+    NSEntityDescription *ent = [NSEntityDescription entityForName:@"Tweet" inManagedObjectContext:self.managedObjectContext];
+    for (NSDictionary *tweetDict in responseArray) {
+        NSNumber *remoteID = [tweetDict objectForKey:@"id"];
+        PDLogObject(([NSString stringWithFormat:@"Tweet #%@",remoteID]), tweetDict);
+        if ([tweetIDs containsObject:remoteID]) {
+            PDTweet *newTweet = [[PDTweet alloc] initWithEntity:ent insertIntoManagedObjectContext:self.managedObjectContext];
+            newTweet.remoteID = remoteID;
+            newTweet.text = [tweetDict valueForKeyPath:@"text"];
+            newTweet.retrievalDate = [NSDate date];
+            
+            NSNumber *userRemoteID = [tweetDict valueForKeyPath:remoteIDKeyPath];
+            NSFetchRequest *existingUserRequest = [NSFetchRequest fetchRequestWithEntityName:@"User"];
+            existingUserRequest.predicate = [NSPredicate predicateWithFormat:@"remoteID == %@", userRemoteID];
+            
+            PDUser *user = [[self.managedObjectContext executeFetchRequest:existingUserRequest error:NULL] lastObject];
+            if (!user) {
+                NSEntityDescription *userEntity = [NSEntityDescription entityForName:@"User" inManagedObjectContext:self.managedObjectContext];
+                user = [[PDUser alloc] initWithEntity:userEntity insertIntoManagedObjectContext:self.managedObjectContext];
+                user.remoteID = userRemoteID;
+                fillUserBlock(user, tweetDict);
+            }
+            
+            newTweet.user = user;
+        }
+    }
+    PDLogGroupEnd();
+    
+    [self.managedObjectContext save:NULL];
+    PDLog(@"Done. Received tweets stored in CoreData.");    
+}
+
 - (void)_reloadFeed;
 {
-    [_client getPath:@"statuses/public_timeline.json?count=30" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSArray *responseArray = responseObject;
-        
-        NSMutableSet *tweetIDs = [[NSMutableSet alloc] initWithCapacity:[responseArray count]];
-        for (NSDictionary *tweetDict in responseArray) {
-            [tweetIDs addObject:[tweetDict objectForKey:@"id"]];
-        }
-        
-        NSFetchRequest *existingRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tweet"];
-        existingRequest.predicate = [NSPredicate predicateWithFormat:@"remoteID in %@", tweetIDs];
-        
-        NSArray *existingTweets = [self.managedObjectContext executeFetchRequest:existingRequest error:nil];
-        
-        for (PDTweet *tweet in existingTweets) {
-            [tweetIDs removeObject:tweet.remoteID];
-        }
-        
-        NSEntityDescription *ent = [NSEntityDescription entityForName:@"Tweet" inManagedObjectContext:self.managedObjectContext];
-        for (NSDictionary *tweetDict in responseArray) {
-            NSNumber *remoteID = [tweetDict objectForKey:@"id"];
-            if ([tweetIDs containsObject:remoteID]) {
-                PDTweet *newTweet = [[PDTweet alloc] initWithEntity:ent insertIntoManagedObjectContext:self.managedObjectContext];
-                newTweet.remoteID = remoteID;
-                newTweet.text = [tweetDict valueForKeyPath:@"text"];
-                newTweet.retrievalDate = [NSDate date];
-                
-                NSNumber *userRemoteID = [tweetDict valueForKeyPath:@"user.id"];
-                NSFetchRequest *existingUserRequest = [NSFetchRequest fetchRequestWithEntityName:@"User"];
-                existingUserRequest.predicate = [NSPredicate predicateWithFormat:@"remoteID == %@", userRemoteID];
-                
-                PDUser *user = [[self.managedObjectContext executeFetchRequest:existingUserRequest error:NULL] lastObject];
-                if (!user) {
-                    NSEntityDescription *userEntity = [NSEntityDescription entityForName:@"User" inManagedObjectContext:self.managedObjectContext];
-                    user = [[PDUser alloc] initWithEntity:userEntity insertIntoManagedObjectContext:self.managedObjectContext];
-                    user.remoteID = userRemoteID;
-                    user.name = [tweetDict valueForKeyPath:@"user.name"];
-                    user.screenName = [tweetDict valueForKeyPath:@"user.screen_name"];
-                    user.profilePictureURL = [tweetDict valueForKeyPath:@"user.profile_image_url"];
-                }
-                
-                newTweet.user = user;
-            }
-        }
-        
-        [self.managedObjectContext save:NULL];
+    PDLog(@"Reloading Tweet Feed…");
+    
+    [_client getPath:@"statuses/user_timeline.json?screen_name=twitterapi&count=30" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject)
+    {
+        [self _processAPIResponse:responseObject
+              userRemoteIDKeyPath:@"user.id"
+                    fillUserBlock:^(PDUser* user, NSDictionary* tweetDict)
+        {
+            user.name = [tweetDict valueForKeyPath:@"user.name"];
+            user.screenName = [tweetDict valueForKeyPath:@"user.screen_name"];
+            user.profilePictureURL = [tweetDict valueForKeyPath:@"user.profile_image_url"];
+        }];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        PDLogWarning(@"AFNetworking failure");
+        PDLogObject(@"Request Operation failed", error);
         [[[UIAlertView alloc] initWithTitle:@"Request Failed" message:[error localizedDescription] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
     }];
 }
 
 - (void)_reloadFeedWithSearchTerm:(NSString *)searchTerm;
 {
-    NSString *path = [NSString stringWithFormat:@"search.json?q=%@", [searchTerm stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-    [_client getPath:path parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    PDLog(@"Reloading Tweet Feed for search term: %@…", searchTerm);
+    
+    NSString *path = [NSString stringWithFormat:@"search/tweets.json?q=%@", [searchTerm stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    [_client getPath:path parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject)
+    {
         NSArray *responseArray = [responseObject objectForKey:@"results"];
-        
-        NSMutableSet *tweetIDs = [[NSMutableSet alloc] initWithCapacity:[responseArray count]];
-        for (NSDictionary *tweetDict in responseArray) {
-            [tweetIDs addObject:[tweetDict objectForKey:@"id"]];
-        }
-        
-        NSFetchRequest *existingRequest = [NSFetchRequest fetchRequestWithEntityName:@"Tweet"];
-        existingRequest.predicate = [NSPredicate predicateWithFormat:@"remoteID in %@", tweetIDs];
-        
-        NSArray *existingTweets = [self.managedObjectContext executeFetchRequest:existingRequest error:nil];
-        
-        for (PDTweet *tweet in existingTweets) {
-            [tweetIDs removeObject:tweet.remoteID];
-        }
-        
-        NSEntityDescription *ent = [NSEntityDescription entityForName:@"Tweet" inManagedObjectContext:self.managedObjectContext];
-        for (NSDictionary *tweetDict in responseArray) {
-            NSNumber *remoteID = [tweetDict objectForKey:@"id"];
-            if ([tweetIDs containsObject:remoteID]) {
-                PDTweet *newTweet = [[PDTweet alloc] initWithEntity:ent insertIntoManagedObjectContext:self.managedObjectContext];
-                newTweet.remoteID = remoteID;
-                newTweet.text = [tweetDict valueForKeyPath:@"text"];
-                newTweet.retrievalDate = [NSDate date];
-                
-                NSNumber *userRemoteID = [tweetDict valueForKeyPath:@"from_user_id"];
-                NSFetchRequest *existingUserRequest = [NSFetchRequest fetchRequestWithEntityName:@"User"];
-                existingUserRequest.predicate = [NSPredicate predicateWithFormat:@"remoteID == %@", userRemoteID];
-                
-                PDUser *user = [[self.managedObjectContext executeFetchRequest:existingUserRequest error:NULL] lastObject];
-                if (!user) {
-                    NSEntityDescription *userEntity = [NSEntityDescription entityForName:@"User" inManagedObjectContext:self.managedObjectContext];
-                    user = [[PDUser alloc] initWithEntity:userEntity insertIntoManagedObjectContext:self.managedObjectContext];
-                    user.remoteID = userRemoteID;
-                    user.name = [tweetDict valueForKeyPath:@"from_user_name"];
-                    user.screenName = [tweetDict valueForKeyPath:@"from_user"];
-                    user.profilePictureURL = [tweetDict valueForKeyPath:@"profile_image_url"];
-                }
-                
-                newTweet.user = user;
-            }
-        }
-        
-        [self.managedObjectContext save:NULL];
+        [self _processAPIResponse:responseArray
+              userRemoteIDKeyPath:@"from_user_id"
+                    fillUserBlock:^(PDUser *user, NSDictionary *tweetDict)
+        {
+            user.name = [tweetDict valueForKeyPath:@"from_user_name"];
+            user.screenName = [tweetDict valueForKeyPath:@"from_user"];
+            user.profilePictureURL = [tweetDict valueForKeyPath:@"profile_image_url"];
+        }];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        PDLogWarning(@"AFNetworking failure");
+        PDLogObject(@"Request Operation failed", error);
         [[[UIAlertView alloc] initWithTitle:@"Request Failed" message:[error localizedDescription] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
     }];
 }
