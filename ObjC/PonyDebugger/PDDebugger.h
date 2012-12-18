@@ -15,7 +15,7 @@
 
 @class SRWebSocket;
 @class PDDomainController;
-
+@class PDConsoleDomainController;
 
 @interface PDDebugger : NSObject
 
@@ -43,6 +43,12 @@
 // View Hierarchy Debugging
 - (void)enableViewHierarchyDebugging;
 - (void)setDisplayedViewAttributeKeyPaths:(NSArray *)keyPaths;
+
+// Console Logging
+- (void)enableRemoteConsole;
+- (void)setEchoRemoteConsoleLocally:(BOOL)echo;
++ (PDConsoleDomainController*)console;
+
 
 @end
 

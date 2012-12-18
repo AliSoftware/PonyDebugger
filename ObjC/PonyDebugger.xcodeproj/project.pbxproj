@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0960F17716800F74007514F4 /* PDConsoleDomainController.h in Headers */ = {isa = PBXBuildFile; fileRef = 0960F17516800F74007514F4 /* PDConsoleDomainController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0960F17816800F74007514F4 /* PDConsoleDomainController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0960F17616800F74007514F4 /* PDConsoleDomainController.m */; };
+		0960F17A168010BA007514F4 /* PDLogs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0960F179168010BA007514F4 /* PDLogs.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2516715615E61023002F2F95 /* PDApplicationCacheDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 2516711015E61023002F2F95 /* PDApplicationCacheDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2516715715E61023002F2F95 /* PDApplicationCacheDomain.m in Sources */ = {isa = PBXBuildFile; fileRef = 2516711115E61023002F2F95 /* PDApplicationCacheDomain.m */; };
 		2516715815E61023002F2F95 /* PDApplicationCacheTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 2516711215E61023002F2F95 /* PDApplicationCacheTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -159,6 +162,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0960F17516800F74007514F4 /* PDConsoleDomainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDConsoleDomainController.h; sourceTree = "<group>"; };
+		0960F17616800F74007514F4 /* PDConsoleDomainController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDConsoleDomainController.m; sourceTree = "<group>"; };
+		0960F179168010BA007514F4 /* PDLogs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDLogs.h; sourceTree = "<group>"; };
 		2516711015E61023002F2F95 /* PDApplicationCacheDomain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDApplicationCacheDomain.h; sourceTree = "<group>"; };
 		2516711115E61023002F2F95 /* PDApplicationCacheDomain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDApplicationCacheDomain.m; sourceTree = "<group>"; };
 		2516711215E61023002F2F95 /* PDApplicationCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDApplicationCacheTypes.h; sourceTree = "<group>"; };
@@ -392,6 +398,7 @@
 				3DE228BE15D5874C0035A508 /* PDDynamicDebuggerDomain.m */,
 				3DE228C915D5874C0035A508 /* PonyDebugger-Prefix.pch */,
 				3DE228CA15D5874C0035A508 /* PonyDebugger.h */,
+				0960F179168010BA007514F4 /* PDLogs.h */,
 			);
 			path = PonyDebugger;
 			sourceTree = "<group>";
@@ -399,6 +406,8 @@
 		3DE2293315D587540035A508 /* Domain Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				0960F17516800F74007514F4 /* PDConsoleDomainController.h */,
+				0960F17616800F74007514F4 /* PDConsoleDomainController.m */,
 				947CE06D163CA24E0035FB90 /* PDInspectorDomainController.h */,
 				947CE06E163CA24E0035FB90 /* PDInspectorDomainController.m */,
 				943D444B160A73810091CA77 /* PDDOMDomainController.h */,
@@ -548,6 +557,8 @@
 				F6EA51A716124E7D00A27364 /* NSData+PDB64Additions.h in Headers */,
 				943D444D160A73810091CA77 /* PDDOMDomainController.h in Headers */,
 				947CE06F163CA24E0035FB90 /* PDInspectorDomainController.h in Headers */,
+				0960F17716800F74007514F4 /* PDConsoleDomainController.h in Headers */,
+				0960F17A168010BA007514F4 /* PDLogs.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -693,6 +704,7 @@
 				F6EA51A816124E7D00A27364 /* NSData+PDB64Additions.m in Sources */,
 				943D444E160A73810091CA77 /* PDDOMDomainController.m in Sources */,
 				947CE070163CA24E0035FB90 /* PDInspectorDomainController.m in Sources */,
+				0960F17816800F74007514F4 /* PDConsoleDomainController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
