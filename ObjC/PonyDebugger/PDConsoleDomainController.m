@@ -79,7 +79,7 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
             [scanner scanUpToString:@" + " intoString:&functionName]; // Function Name
             
             cf.functionName = functionName;
-            cf.url = file ? [NSString stringWithFormat:@"file://%@",file] : [NSString stringWithFormat:@"(%@)",libName];
+            cf.url = [file hasPrefix:@"/"] ? [NSString stringWithFormat:@"file://%@",file] : file ?: [NSString stringWithFormat:@"(%@)",libName];
             cf.lineNumber = @(line);
             [stack addObject:cf];
             
@@ -93,7 +93,7 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
     {
         // Other logs don't display stack trace but still display file and line number
         PDConsoleCallFrame* topCallFrame = [[PDConsoleCallFrame alloc] init];
-        topCallFrame.url = file ? [NSString stringWithFormat:@"file://%@",file] : nil;
+        topCallFrame.url = [file hasPrefix:@"/"] ? [NSString stringWithFormat:@"file://%@",file] : file ?: nil;
         topCallFrame.lineNumber = @(line);
         message.stackTrace = @[topCallFrame];
     }
@@ -172,42 +172,55 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
 
 #pragma mark - Object Logging
 
--(void)logError:(NSError*)error
+-(void)logObject:(id)object name:(NSString*)name
 {
-    NSError* suberror = error.userInfo[NSUnderlyingErrorKey];
-    NSString* domainString = [NSString stringWithFormat:@"[%@]",error.domain];
-    if (!suberror)
-    {
-        [self logLevel:PDConsoleLogLevelLog message:[error description] file:domainString line:error.code];
-    }
-    else
-    {
-        [self logGroupMessage:[error description] file:domainString line:error.code collapsed:NO execute:^{
-            [self logError:suberror];
-        }];
-    }
+    [self logObject:object name:name collapsed:NO];
 }
 
--(void)logObject:(id)object name:(NSString*)name
+/* Handle nicely NSDictionary, NSArray, NSError objects */
+-(void)logObject:(id)object name:(NSString*)name collapsed:(BOOL)collapsed
 {
     if ([object respondsToSelector:@selector(enumerateObjectsUsingBlock:)])
     {
-        [self logGroupMessage:name collapsed:NO execute:^{
+        /* NSArray */
+        [self logGroupMessage:name collapsed:collapsed execute:^{
             [object enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                [self logObject:obj name:[NSString stringWithFormat:@"[%d]",idx]];
+                [self logObject:obj name:[NSString stringWithFormat:@"[%d]",idx] collapsed:collapsed];
             }];
         }];
     }
     else if ([object respondsToSelector:@selector(enumerateKeysAndObjectsUsingBlock:)])
     {
-        [self logGroupMessage:name collapsed:NO execute:^{
+        /* NSDictionary */
+        [self logGroupMessage:name collapsed:collapsed execute:^{
             [object enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-                [self logObject:obj name:key];
+                [self logObject:obj name:key collapsed:collapsed];
             }];
         }];
     }
+    else if ([object isKindOfClass:[NSError class]])
+    {
+        /* NSError */
+        NSError* error = (NSError*)object;
+        NSString* errorDescription = [NSString stringWithFormat:@"<NSError %@ (%d): \"%@\">", error.domain, error.code, error.localizedDescription];
+        NSString* domainString = [NSString stringWithFormat:@"[%@]",error.domain];
+        if (!error.userInfo)
+        {
+            [self logLevel:PDConsoleLogLevelLog message:errorDescription file:domainString line:error.code];
+        }
+        else
+        {
+            [self logGroupMessage:errorDescription file:domainString line:error.code collapsed:collapsed execute:^{
+                // Enumerate NSError's userInfo dictionary
+                [error.userInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                    [self logObject:obj name:key collapsed:collapsed];
+                }];
+            }];
+        }
+    }
     else
     {
+        /* Other Objects */
         [self logLevel:PDConsoleLogLevelLog format:@"%@ = %@", name, object];
     }
 }

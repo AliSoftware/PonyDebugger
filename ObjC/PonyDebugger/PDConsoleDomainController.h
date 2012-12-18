@@ -47,8 +47,9 @@ typedef NS_ENUM(uint16_t, PDConsoleLogLevel) {
 
 #pragma mark - Object Logging
 
--(void)logError:(NSError*)error;
--(void)logObject:(id)object name:(NSString*)name;
+/* Render nicely NSDictionary, NSArray, NSError objects as a tree hierarchy */
+-(void)logObject:(id)object name:(NSString*)name; /* collapsed:NO by default */
+-(void)logObject:(id)object name:(NSString*)name collapsed:(BOOL)collapsed;
 -(void)logViewHierarchy:(UIView*)rootView;
 
 
