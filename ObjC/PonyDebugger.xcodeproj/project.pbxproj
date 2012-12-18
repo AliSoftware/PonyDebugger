@@ -309,6 +309,7 @@
 		0960F1C416804180007514F4 /* Logging Additions */ = {
 			isa = PBXGroup;
 			children = (
+				0960F179168010BA007514F4 /* PDLogs.h */,
 				0960F1CE16804934007514F4 /* PDDebugger+Console.h */,
 				0960F1CF16804934007514F4 /* PDDebugger+Console.m */,
 				0960F1C6168041B8007514F4 /* NSError+PonyDebugger.m */,
@@ -418,7 +419,6 @@
 				3DE228C915D5874C0035A508 /* PonyDebugger-Prefix.pch */,
 				3DE228CA15D5874C0035A508 /* PonyDebugger.h */,
 				0960F1C416804180007514F4 /* Logging Additions */,
-				0960F179168010BA007514F4 /* PDLogs.h */,
 			);
 			path = PonyDebugger;
 			sourceTree = "<group>";
@@ -572,14 +572,14 @@
 				2516719215E61023002F2F95 /* PDTimelineDomain.h in Headers */,
 				2516719415E61023002F2F95 /* PDTimelineTypes.h in Headers */,
 				2516719615E61023002F2F95 /* PDWebGLDomain.h in Headers */,
-				2516719815E61023002F2F95 /* PDWebGLTypes.h in Headers */,
 				2516719A15E61023002F2F95 /* PDWorkerDomain.h in Headers */,
+				2516719815E61023002F2F95 /* PDWebGLTypes.h in Headers */,
+				0960F1D016804934007514F4 /* PDDebugger+Console.h in Headers */,
 				F6EA51A716124E7D00A27364 /* NSData+PDB64Additions.h in Headers */,
 				943D444D160A73810091CA77 /* PDDOMDomainController.h in Headers */,
 				947CE06F163CA24E0035FB90 /* PDInspectorDomainController.h in Headers */,
 				0960F17716800F74007514F4 /* PDConsoleDomainController.h in Headers */,
 				0960F17A168010BA007514F4 /* PDLogs.h in Headers */,
-				0960F1D016804934007514F4 /* PDDebugger+Console.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

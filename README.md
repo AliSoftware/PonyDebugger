@@ -234,33 +234,34 @@ To enable PonyDebugger to send messages to the Chrome Developer Tools Console:
 ```
 
 If you want your logs sent to the remote console to also be echoed in your Xcode console, turn on the corresponding property:
+
 ``` objective-c
 [debugger setEchoRemoteConsoleLocally:YES];
 ```
 
-Then to log messages into the remote console, you can retrieve a reference to the `PDConsoleDomainController` using the `console` method of `PDDebugger`, and start to send messages to it:
+Then to log messages into the remote console, you can use the methods defined in `<PonyDebugger/PDDebugger+Console.h>`:
 
 ``` objective-c
-[[debugger console] logLevel:PDConsoleLogLevelWarning message:@"Woops"];
+[debugger logLevel:PDConsoleLogLevelWarning message:@"Woops"];
+[debugger logLevel:PDConsoleLogLevelWarning message:@"Woops"];
 ```
-
-Anyway, I advise you to use the macros designed for that purpose instead, because they are easier to use and are quite a drop-in remplacement for the `NSLog` macro.
-Besides, they insert the source file name (`__FILE__`) and current line number (`__LINE__`) for you when appropriate.
-They are all defined in `<PonyDebugger/PDLogs.h>`:
+You can also use the macros defined in `<PonyDebugger/PDLogs.h>` as a drop-in remplacement for the `NSLog` macro.
+These macros are generally easier and shorter to call than the methods on the `defaultInstance`.
+Besides, they insert the source file name and line number for you when appropriate:
 
 ``` objective-c
 PDLog(@"Hello %@", name); // simple log
 PDLogWarning(@"Huston we have a problem"); // warning log (yellow)
 PDLogFatal(@"We should never go there!"); // error log (red) with stack track
-PDLogObject(someDict, @"niceDictionary"); // collapsable log tree
+PDLogObject(someDict, @"niceDictionary"); // collapsable log-tree
 
 PDLogGroup(@"Refresh log details",YES,^{  // will create a "group" or "tree root"
 	PDLog(@"Loading data..."); // will add this log as a child to the previous group
-	[self loadData];
-	PDLog(@"Updating model..."); // this one too
+	[self loadData]; // if loadData itself generate some logs, those will be inside the group too
+	PDLog(@"Updating model...");
 	[self updateModel];
-	PDLog(@"Done!"); // and this one too
-}); // and the group ends here
+	PDLog(@"Done!");
+}); // You will be able to hide or show the children as you please by expanding/collapsing the group in the console !
 ```
 
 ----

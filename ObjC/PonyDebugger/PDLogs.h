@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 AliSoftware. All rights reserved.
 //
 
-#import <PonyDebugger/PDDebugger.h>
 #import <PonyDebugger/PDDebugger+Console.h>
 
 /* Log Standard Messages */
