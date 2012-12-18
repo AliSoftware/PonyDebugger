@@ -291,20 +291,6 @@ static NSString *const PDClientIDKey = @"com.squareup.PDDebugger.clientID";
     [self _addController:[PDConsoleDomainController defaultInstance]];
 }
 
-- (void)setEchoRemoteConsoleLocally:(BOOL)echo
-{
-    self.console.echoInLocalConsole = echo;
-}
-
-// Commodity accessor 
-+ (PDConsoleDomainController*)console
-{
-    return [[self defaultInstance] console];
-}
-- (PDConsoleDomainController*)console
-{
-    return (PDConsoleDomainController*) [[self domainForName:[PDConsoleDomainController domainName]] delegate];
-}
 
 #pragma mark - Private Methods
 

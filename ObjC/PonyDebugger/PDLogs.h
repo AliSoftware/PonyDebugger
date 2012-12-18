@@ -7,19 +7,19 @@
 //
 
 #import <PonyDebugger/PDDebugger.h>
-#import <PonyDebugger/PDConsoleDomainController.h>
+#import <PonyDebugger/PDDebugger+Console.h>
 
 /* Log Standard Messages */
-#define PDLogLevel(_level,_fmt,...)  [[PDDebugger console] logLevel:(_level) message:[NSString stringWithFormat:(_fmt), ##__VA_ARGS__] file:(@ __FILE__) line:__LINE__];
+#define PDLogLevel(_level,_fmt,...)  [[PDDebugger defaultInstance] logLevel:(_level) message:[NSString stringWithFormat:(_fmt), ##__VA_ARGS__] file:(@ __FILE__) line:__LINE__];
 #define PDLog(_fmt,...)              PDLogLevel(PDConsoleLogLevelLog,     _fmt, ##__VA_ARGS__) /* Standard Log : plain text */
 #define PDLogWarning(_fmt,...)       PDLogLevel(PDConsoleLogLevelWarning, _fmt, ##__VA_ARGS__) /* Warning Log : yellow icon */
 #define PDLogFatal(_fmt,...)         PDLogLevel(PDConsoleLogLevelError,   _fmt, ##__VA_ARGS__) /* Fatal Log : red icon + stack trace */
 #define PDLogInfo(_fmt,...)          PDLogLevel(PDConsoleLogLevelDebug,   _fmt, ##__VA_ARGS__) /* Info Log : blue icon, always visible */
 
 /* Log NSArray, NSDictionary & NSErrors as nice recursive trees */
-#define PDLogObject(_object,_name)   [[PDDebugger console] logObject:(_object) name:(_name) collapsed:YES]
+#define PDLogObject(_object,_name)   [[PDDebugger defaultInstance] logObject:(_object) name:(_name) collapsed:YES]
 
 /* Log trees/groups, to organize logs into hierarchical info */
-#define PDLogGroup(_groupText,_collapse,_code)  [[PDDebugger console] logGroupMessage:(_groupText) file:(@ __FILE__) line:__LINE__ collapsed:_collapse execute:(_code)]
-#define PDLogGroupStart(_groupText,_collapse)   [[PDDebugger console] startGroupMessage:(_groupText) file:(@ __FILE__) line:__LINE__ collapsed:_collapse]
-#define PDLogGroupEnd()                         [[PDDebugger console] endGroupMessage]
+#define PDLogGroup(_groupText,_collapse,_code)  [[PDDebugger defaultInstance] logGroupMessage:(_groupText) file:(@ __FILE__) line:__LINE__ collapsed:_collapse execute:(_code)]
+#define PDLogGroupStart(_groupText,_collapse)   [[PDDebugger defaultInstance] startGroupMessage:(_groupText) file:(@ __FILE__) line:__LINE__ collapsed:_collapse]
+#define PDLogGroupEnd()                         [[PDDebugger defaultInstance] endGroupMessage]

@@ -7,9 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0960F17716800F74007514F4 /* PDConsoleDomainController.h in Headers */ = {isa = PBXBuildFile; fileRef = 0960F17516800F74007514F4 /* PDConsoleDomainController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0960F17716800F74007514F4 /* PDConsoleDomainController.h in Headers */ = {isa = PBXBuildFile; fileRef = 0960F17516800F74007514F4 /* PDConsoleDomainController.h */; settings = {ATTRIBUTES = (); }; };
 		0960F17816800F74007514F4 /* PDConsoleDomainController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0960F17616800F74007514F4 /* PDConsoleDomainController.m */; };
 		0960F17A168010BA007514F4 /* PDLogs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0960F179168010BA007514F4 /* PDLogs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0960F1C8168041B8007514F4 /* NSError+PonyDebugger.m in Sources */ = {isa = PBXBuildFile; fileRef = 0960F1C6168041B8007514F4 /* NSError+PonyDebugger.m */; };
+		0960F1CC16804240007514F4 /* UIView+PonyDebugger.m in Sources */ = {isa = PBXBuildFile; fileRef = 0960F1CA16804240007514F4 /* UIView+PonyDebugger.m */; };
+		0960F1D016804934007514F4 /* PDDebugger+Console.h in Headers */ = {isa = PBXBuildFile; fileRef = 0960F1CE16804934007514F4 /* PDDebugger+Console.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0960F1D116804934007514F4 /* PDDebugger+Console.m in Sources */ = {isa = PBXBuildFile; fileRef = 0960F1CF16804934007514F4 /* PDDebugger+Console.m */; };
 		2516715615E61023002F2F95 /* PDApplicationCacheDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 2516711015E61023002F2F95 /* PDApplicationCacheDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2516715715E61023002F2F95 /* PDApplicationCacheDomain.m in Sources */ = {isa = PBXBuildFile; fileRef = 2516711115E61023002F2F95 /* PDApplicationCacheDomain.m */; };
 		2516715815E61023002F2F95 /* PDApplicationCacheTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 2516711215E61023002F2F95 /* PDApplicationCacheTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -165,6 +169,10 @@
 		0960F17516800F74007514F4 /* PDConsoleDomainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDConsoleDomainController.h; sourceTree = "<group>"; };
 		0960F17616800F74007514F4 /* PDConsoleDomainController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDConsoleDomainController.m; sourceTree = "<group>"; };
 		0960F179168010BA007514F4 /* PDLogs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDLogs.h; sourceTree = "<group>"; };
+		0960F1C6168041B8007514F4 /* NSError+PonyDebugger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+PonyDebugger.m"; sourceTree = "<group>"; };
+		0960F1CA16804240007514F4 /* UIView+PonyDebugger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+PonyDebugger.m"; sourceTree = "<group>"; };
+		0960F1CE16804934007514F4 /* PDDebugger+Console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PDDebugger+Console.h"; sourceTree = "<group>"; };
+		0960F1CF16804934007514F4 /* PDDebugger+Console.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "PDDebugger+Console.m"; sourceTree = "<group>"; };
 		2516711015E61023002F2F95 /* PDApplicationCacheDomain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDApplicationCacheDomain.h; sourceTree = "<group>"; };
 		2516711115E61023002F2F95 /* PDApplicationCacheDomain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDApplicationCacheDomain.m; sourceTree = "<group>"; };
 		2516711215E61023002F2F95 /* PDApplicationCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDApplicationCacheTypes.h; sourceTree = "<group>"; };
@@ -298,6 +306,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0960F1C416804180007514F4 /* Logging Additions */ = {
+			isa = PBXGroup;
+			children = (
+				0960F1CE16804934007514F4 /* PDDebugger+Console.h */,
+				0960F1CF16804934007514F4 /* PDDebugger+Console.m */,
+				0960F1C6168041B8007514F4 /* NSError+PonyDebugger.m */,
+				0960F1CA16804240007514F4 /* UIView+PonyDebugger.m */,
+			);
+			name = "Logging Additions";
+			sourceTree = "<group>";
+		};
 		2516710F15E61023002F2F95 /* DerivedSources */ = {
 			isa = PBXGroup;
 			children = (
@@ -398,6 +417,7 @@
 				3DE228BE15D5874C0035A508 /* PDDynamicDebuggerDomain.m */,
 				3DE228C915D5874C0035A508 /* PonyDebugger-Prefix.pch */,
 				3DE228CA15D5874C0035A508 /* PonyDebugger.h */,
+				0960F1C416804180007514F4 /* Logging Additions */,
 				0960F179168010BA007514F4 /* PDLogs.h */,
 			);
 			path = PonyDebugger;
@@ -559,6 +579,7 @@
 				947CE06F163CA24E0035FB90 /* PDInspectorDomainController.h in Headers */,
 				0960F17716800F74007514F4 /* PDConsoleDomainController.h in Headers */,
 				0960F17A168010BA007514F4 /* PDLogs.h in Headers */,
+				0960F1D016804934007514F4 /* PDDebugger+Console.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -705,6 +726,9 @@
 				943D444E160A73810091CA77 /* PDDOMDomainController.m in Sources */,
 				947CE070163CA24E0035FB90 /* PDInspectorDomainController.m in Sources */,
 				0960F17816800F74007514F4 /* PDConsoleDomainController.m in Sources */,
+				0960F1C8168041B8007514F4 /* NSError+PonyDebugger.m in Sources */,
+				0960F1CC16804240007514F4 /* UIView+PonyDebugger.m in Sources */,
+				0960F1D116804934007514F4 /* PDDebugger+Console.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

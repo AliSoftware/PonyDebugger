@@ -46,8 +46,7 @@
 
 // Console Logging
 - (void)enableRemoteConsole;
-- (void)setEchoRemoteConsoleLocally:(BOOL)echo;
-+ (PDConsoleDomainController*)console;
+/* The rest of the logging methods are separated in a dedicated PDDebugger+Console.h header */
 
 
 @end

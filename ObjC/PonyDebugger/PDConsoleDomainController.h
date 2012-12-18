@@ -9,14 +9,17 @@
 
 #import <PonyDebugger/PonyDebugger.h>
 #import <PonyDebugger/PDConsoleDomain.h>
+#import <PonyDebugger/PDDebugger+Console.h>
 
-typedef NS_ENUM(uint16_t, PDConsoleLogLevel) {
-    PDConsoleLogLevelTip,
-    PDConsoleLogLevelLog,
-    PDConsoleLogLevelWarning,
-    PDConsoleLogLevelError,
-    PDConsoleLogLevelDebug
-};
+////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - Statics
+
+extern NSString* const kPDConsoleLogTypeLog;
+extern NSString* const kPDConsoleLogTypeStartGroup;
+extern NSString* const kPDConsoleLogTypeStartGroupCollapsed;
+extern NSString* const kPDConsoleLogTypeEndGroup;
+
+
 
 @class UIView;
 @interface PDConsoleDomainController : PDDomainController
@@ -26,32 +29,12 @@ typedef NS_ENUM(uint16_t, PDConsoleLogLevel) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark - Public API
+#pragma mark - Public Methods
 
 @property(nonatomic, assign) BOOL echoInLocalConsole; // NSLog the log messages in addition to send them to PonyDebugger?
 
 -(void)clearConsole;
--(void)logLevel:(PDConsoleLogLevel)level message:(NSString *)message;
--(void)logLevel:(PDConsoleLogLevel)level message:(NSString *)message file:(NSString*)file line:(int)line;
--(void)logLevel:(PDConsoleLogLevel)level format:(NSString *)format, ... NS_FORMAT_FUNCTION(2,3);
-
-#pragma mark Grouping Logs
-
-// These calls "startGroupMessage:file:line:collapsed:" then the codeInGroup() block, then "endGroupMessage", so that's easier to call, indent and read
--(void)logGroupMessage:(NSString*)message collapsed:(BOOL)collapsed execute:(dispatch_block_t)codeInGroup;
--(void)logGroupMessage:(NSString*)message file:(NSString*)file line:(int)line collapsed:(BOOL)collapsed execute:(dispatch_block_t)codeInGroup;
-// These are the separate start/end calls, that needs to be balanced manually, in rare cases the start/end calls can't be in the same method (async calls, …)
--(void)startGroupMessage:(NSString*)message file:(NSString*)file line:(int)line collapsed:(BOOL)collapsed;
--(void)endGroupMessage;
-
-
-#pragma mark - Object Logging
-
-/* Render nicely NSDictionary, NSArray, NSError objects as a tree hierarchy */
--(void)logObject:(id)object name:(NSString*)name; /* collapsed:NO by default */
--(void)logObject:(id)object name:(NSString*)name collapsed:(BOOL)collapsed;
--(void)logViewHierarchy:(UIView*)rootView;
-
+-(void)logLevel:(PDConsoleLogLevel)level message:(NSString*)text type:(NSString*)type file:(NSString*)file line:(int)line;
 
 @end
 

@@ -9,7 +9,15 @@
 
 #import "PDConsoleDomainController.h"
 #import "PDConsoleTypes.h"
-#import <UIKit/UIKit.h>
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark - Statics
+
+NSString* const kPDConsoleLogTypeLog = @"log";
+NSString* const kPDConsoleLogTypeStartGroup = @"startGroup";
+NSString* const kPDConsoleLogTypeStartGroupCollapsed = @"startGroupCollapsed";
+NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
 
 
 @interface PDConsoleDomainController () <PDConsoleCommandDelegate>
@@ -24,11 +32,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - Statics
-
-static NSString* const kPDConsoleLogTypeLog = @"log";
-static NSString* const kPDConsoleLogTypeStartGroup = @"startGroup";
-static NSString* const kPDConsoleLogTypeStartGroupCollapsed = @"startGroupCollapsed";
-static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
 
 + (PDConsoleDomainController *)defaultInstance;
 {
@@ -52,12 +55,14 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
 
 -(void)logLevel:(PDConsoleLogLevel)level message:(NSString*)text type:(NSString*)type file:(NSString*)file line:(int)line
 {
+    static int indentationLevel = 0;
+    
     PDConsoleConsoleMessage* message = [[PDConsoleConsoleMessage alloc] init];
     message.source = @"console-api";
     message.level = @[@"tip",@"log",@"warning",@"error",@"debug"][level];
     message.type = type;
     message.text = text;
-    if (line < 0)
+    if (line > 0)
     {
         message.line = @(line);
     }
@@ -100,23 +105,31 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
     
     [self.domain messageAddedWithMessage:message];
     
-    if (self.echoInLocalConsole && message.text)
+    if (self.echoInLocalConsole)
     {
-        if (message.line && ([message.line intValue]>=0))
+        if ([type isEqualToString:kPDConsoleLogTypeEndGroup])
+            --indentationLevel;
+        
+        if (message.text)
         {
-            NSLog(@"[%@:%@] %@", [message.level uppercaseString], message.line, message.text);
-        } else {
-            NSLog(@"[%@] %@", [message.level uppercaseString], message.text);
+            NSString* indent = [@"" stringByPaddingToLength:(3*indentationLevel) withString:@" | " startingAtIndex:0];
+            if (message.line && ([message.line intValue]>0))
+            {
+                NSLog(@"[%@:%@] %@%@", [message.level uppercaseString], message.line, indent, message.text);
+            } else {
+                NSLog(@"[%@] %@%@", [message.level uppercaseString], indent, message.text);
+            }
         }
+        
+        if (([type isEqualToString:kPDConsoleLogTypeStartGroup]) || ([type isEqualToString:kPDConsoleLogTypeStartGroupCollapsed]))
+            ++indentationLevel;
     }
 }
 
 
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark - Public API
+#pragma mark - Public Methods
 
 
 -(void)clearConsole
@@ -126,137 +139,6 @@ static NSString* const kPDConsoleLogTypeEndGroup = @"endGroup";
 }
 
 
--(void)logLevel:(PDConsoleLogLevel)level message:(NSString *)message file:(NSString*)file line:(int)line
-{
-    [self logLevel:level message:message type:kPDConsoleLogTypeLog file:file line:line];
-}
--(void)logLevel:(PDConsoleLogLevel)level message:(NSString *)message
-{
-    [self logLevel:level message:message file:nil line:0];
-}
-
--(void)logLevel:(PDConsoleLogLevel)level format:(NSString *)format, ...
-{
-    va_list args;
-    va_start(args, format);
-    NSString* message = [[NSString alloc] initWithFormat:format arguments:args];
-    va_end(args);
-    
-    [self logLevel:level message:message type:kPDConsoleLogTypeLog file:nil line:-1];
-}
-
-
-#pragma mark Grouping Logs
-
--(void)logGroupMessage:(NSString*)message collapsed:(BOOL)collapsed execute:(dispatch_block_t)codeInGroup
-{
-    [self logGroupMessage:message file:nil line:-1 collapsed:collapsed execute:codeInGroup];
-}
--(void)logGroupMessage:(NSString*)message file:(NSString*)file line:(int)line collapsed:(BOOL)collapsed execute:(dispatch_block_t)codeInGroup
-{
-    NSString* type = collapsed ? kPDConsoleLogTypeStartGroupCollapsed : kPDConsoleLogTypeStartGroup;
-    [self logLevel:PDConsoleLogLevelLog message:message type:type file:file line:line];
-    if (codeInGroup) codeInGroup();
-    [self logLevel:PDConsoleLogLevelLog message:nil type:kPDConsoleLogTypeEndGroup file:file line:line];
-}
--(void)startGroupMessage:(NSString*)message file:(NSString*)file line:(int)line collapsed:(BOOL)collapsed
-{
-    NSString* type = collapsed ? kPDConsoleLogTypeStartGroupCollapsed : kPDConsoleLogTypeStartGroup;
-    [self logLevel:PDConsoleLogLevelLog message:message type:type file:file line:line];
-}
--(void)endGroupMessage
-{
-    [self logLevel:PDConsoleLogLevelLog message:nil type:kPDConsoleLogTypeEndGroup file:nil line:-1];
-}
-
-
-#pragma mark - Object Logging
-
--(void)logObject:(id)object name:(NSString*)name
-{
-    [self logObject:object name:name collapsed:NO];
-}
-
-/* Handle nicely NSDictionary, NSArray, NSError objects */
--(void)logObject:(id)object name:(NSString*)name collapsed:(BOOL)collapsed
-{
-    if ([object respondsToSelector:@selector(enumerateObjectsUsingBlock:)])
-    {
-        /* NSArray */
-        [self logGroupMessage:name collapsed:collapsed execute:^{
-            [object enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                [self logObject:obj name:[NSString stringWithFormat:@"[%d]",idx] collapsed:collapsed];
-            }];
-        }];
-    }
-    else if ([object respondsToSelector:@selector(enumerateKeysAndObjectsUsingBlock:)])
-    {
-        /* NSDictionary */
-        [self logGroupMessage:name collapsed:collapsed execute:^{
-            [object enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-                [self logObject:obj name:key collapsed:collapsed];
-            }];
-        }];
-    }
-    else if ([object isKindOfClass:[NSError class]])
-    {
-        /* NSError */
-        NSError* error = (NSError*)object;
-        NSString* errorDescription = [NSString stringWithFormat:@"<NSError %@ (%d): \"%@\">",
-                                      error.domain, error.code, error.localizedDescription];
-        if (name)
-        {
-            errorDescription = [NSString stringWithFormat:@"%@ = %@", name, errorDescription];
-        }
-        NSString* domainString = [NSString stringWithFormat:@"[%@]",error.domain];
-        
-        if (!error.userInfo)
-        {
-            // Flat log
-            [self logLevel:PDConsoleLogLevelLog message:errorDescription file:domainString line:error.code];
-        }
-        else
-        {
-            // Hierarchical Log with UserInfo keys
-            [self logGroupMessage:errorDescription file:domainString line:error.code collapsed:collapsed execute:^{
-                // Enumerate NSError's userInfo dictionary
-                [error.userInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-                    [self logObject:obj name:key collapsed:collapsed];
-                }];
-            }];
-        }
-    }
-    else
-    {
-        /* Other Objects */
-        if (name)
-        {
-            [self logLevel:PDConsoleLogLevelLog format:@"%@ = %@", name, object];
-        }
-        else
-        {
-            [self logLevel:PDConsoleLogLevelLog message:object];
-        }
-    }
-}
-
--(void)logViewHierarchy:(UIView*)rootView
-{
-    if (rootView.subviews.count == 0)
-    {
-        [self logLevel:PDConsoleLogLevelLog message:[rootView description]];
-    }
-    else
-    {
-        // Contains child views
-        [self logGroupMessage:[rootView description] collapsed:YES execute:^{
-            for(UIView* v in rootView.subviews)
-            {
-                [self logViewHierarchy:v];
-            }
-        }];
-    }
-}
-
 @end
+
 
