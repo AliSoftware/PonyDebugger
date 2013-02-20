@@ -46,7 +46,7 @@ An "inspect" mode can be entered by clicking on the magnifying glass in the lowe
 
 Currently only a subset of the actions possible from the elements panel have been implemented. There is significant room for continued work and improvement, but the current functionality should prove useful nonetheless.
 
-### Remove Console Logging
+### Remote Console Logging
 
 Thanks to @AliSoftware's contribution, PonyDebugger can now also send debugging messages to the Chrome Inspector Console.
 
